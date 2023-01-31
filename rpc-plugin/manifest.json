@@ -1,0 +1,12 @@
+{
+  "$schema": "https://bitcartcc.com/schemas/plugin/1.0.0/plugin.schema.json",
+  "name": "Daemons RPC Plugin",
+  "organization": "bitcartcc",
+  "version": "1.0.0",
+  "description": "Exposes daemon RPC in web API and allows to play with it in admin panel",
+  "constraints": { "bitcartcc": "" },
+  "installs": [
+    { "type": "backend", "path": "src/backend/rpc_plugin" },
+    { "type": "admin", "path": "src/admin/rpc-plugin" }
+  ]
+}
