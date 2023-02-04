@@ -1,0 +1,12 @@
+{
+  "$schema": "https://bitcartcc.com/schemas/plugin/1.1.0/plugin.schema.json",
+  "name": "Batch import",
+  "author": "bitcartcc",
+  "version": "1.0.0",
+  "description": "Adds batch import functionality to most pages",
+  "constraints": { "bitcartcc": "" },
+  "installs": [
+    { "type": "backend", "path": "src/backend/batchimport" },
+    { "type": "admin", "path": "src/admin/batchimport" }
+  ]
+}
