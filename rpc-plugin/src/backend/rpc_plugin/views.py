@@ -29,7 +29,7 @@ async def coin_rpc(
     coin: str,
     request: Request,
     user: models.User = Security(
-        utils.authorization.AuthDependency(), scopes=["server_management"]
+        utils.authorization.auth_dependency, scopes=["server_management"]
     ),
 ):
     try:
@@ -61,7 +61,7 @@ async def coin_spec(
     coin: str,
     request: Request,
     user: models.User = Security(
-        utils.authorization.AuthDependency(), scopes=["server_management"]
+        utils.authorization.auth_dependency, scopes=["server_management"]
     ),
 ):
     try:

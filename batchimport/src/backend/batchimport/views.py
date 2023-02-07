@@ -32,7 +32,7 @@ async def batchimport(request: Request, table: str, file: UploadFile = File(...)
     table = table.capitalize()
     if table not in models.all_tables:
         raise Exception("Table not found")
-    user = await utils.authorization.AuthDependency()(
+    user = await utils.authorization.auth_dependency(
         request, SecurityScopes([f"{table.lower()}_management"])
     )
     model = models.all_tables[table]
