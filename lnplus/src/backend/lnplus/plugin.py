@@ -2,7 +2,7 @@ import asyncio
 from decimal import Decimal
 from urllib.parse import urlsplit
 
-from api import invoices, settings, utils
+from api import invoices, utils
 from api.plugins import BaseCoin, BasePlugin, CoinServer, register_filter
 
 from . import clients
@@ -21,6 +21,8 @@ class LNPlusCoin(BaseCoin):
     xpub_name = "Node URL"
     server_cls = LnPlusCoinServer
 
+    rate_rules = "LNPLUS_X = BTC_X"
+
     async def validate_key(self, key, *args, **kwargs):
         node_url = key
         if not node_url:
@@ -38,12 +40,6 @@ class LNPlusCoin(BaseCoin):
             "unmatured": Decimal(0),
             "lightning": Decimal(0),
         }
-
-    async def rate(self, currency):
-        return await settings.settings.cryptos["btc"].rate(currency)
-
-    async def list_fiat(self):
-        return await settings.settings.cryptos["btc"].list_fiat()
 
     async def get_request(self, request_id):
         is_paid = await self.server.client.check_payment(request_id)
