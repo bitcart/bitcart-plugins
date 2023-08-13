@@ -1,14 +1,14 @@
 {
-    "$schema": "https://bitcartcc.com/schemas/plugin/1.1.0/plugin.schema.json",
+    "$schema": "https://bitcart.ai/schemas/plugin/1.2.0/plugin.schema.json",
     "name": "Ratings plugin",
-    "author": "bitcartcc",
+    "author": "bitcart",
     "license": "MIT",
-    "website": "https://bitcartcc.com",
-    "source_url": "https://github.com/bitcartcc/bitcart-plugins/tree/master/ratings",
-    "docs_url": "https://docs.bitcartcc.com",
+    "website": "https://bitcart.ai",
+    "source_url": "https://github.com/bitcart/bitcart-plugins/tree/master/ratings",
+    "docs_url": "https://docs.bitcart.ai",
     "version": "1.0.0",
     "description": "Adds rating to products on store POS",
-    "constraints": { "bitcartcc": "" },
+    "constraints": { "bitcart": "" },
     "installs": [
         { "type": "store", "path": "src/store/ratings" },
         { "type": "backend", "path": "src/backend/ratings" }

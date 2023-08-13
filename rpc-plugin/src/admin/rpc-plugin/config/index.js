@@ -1,6 +1,6 @@
 export default {
-  name: "@bitcartcc/rpc-plugin",
+  name: "@bitcart/rpc-plugin",
   aliases: {
-    "@bitcartcc-rpc-plugin": "/",
+    "@bitcart-rpc-plugin": "/",
   },
 }

@@ -1,6 +1,6 @@
 export default {
-  name: "@bitcartcc/batchimport",
+  name: "@bitcart/batchimport",
   aliases: {
-    "@bitcartcc-batchimport": "/",
+    "@bitcart-batchimport": "/",
   },
 }

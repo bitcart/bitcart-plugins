@@ -1,4 +1,4 @@
-import RPCInteractive from "@bitcartcc-rpc-plugin/pages/rpc-interactive"
+import RPCInteractive from "@bitcart-rpc-plugin/pages/rpc-interactive"
 
 export default [
   {

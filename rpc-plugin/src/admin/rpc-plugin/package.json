@@ -1,5 +1,5 @@
 {
-  "name": "@bitcartcc/rpc-plugin",
+  "name": "@bitcart/rpc-plugin",
   "version": "1.0.0",
   "license": "MIT",
   "dependencies": {}

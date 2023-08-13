@@ -1,4 +1,4 @@
-import BatchImport from "@bitcartcc-batchimport/components/BatchImport"
+import BatchImport from "@bitcart-batchimport/components/BatchImport"
 
 export default {
   extendComponents: {

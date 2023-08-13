@@ -45,4 +45,4 @@ __pycache__/
 env/
 htmlcov/
 venv
-Daemons RPC Plugin.bitcartcc
+Daemons RPC Plugin.bitcart

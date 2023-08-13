@@ -1,5 +1,5 @@
 {
-  "name": "@bitcartcc/batchimport",
+  "name": "@bitcart/batchimport",
   "version": "1.0.0",
   "license": "MIT",
   "dependencies": {}

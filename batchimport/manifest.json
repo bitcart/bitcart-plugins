@@ -1,14 +1,14 @@
 {
-  "$schema": "https://bitcartcc.com/schemas/plugin/1.1.0/plugin.schema.json",
+  "$schema": "https://bitcart.ai/schemas/plugin/1.2.0/plugin.schema.json",
   "name": "Batch import",
-  "author": "bitcartcc",
+  "author": "bitcart",
   "license": "MIT",
-  "website": "https://bitcartcc.com",
-  "source_url": "https://github.com/bitcartcc/bitcart-plugins/tree/master/batchimport",
-  "docs_url": "https://docs.bitcartcc.com",
+  "website": "https://bitcart.ai",
+  "source_url": "https://github.com/bitcart/bitcart-plugins/tree/master/batchimport",
+  "docs_url": "https://docs.bitcart.ai",
   "version": "1.0.0",
   "description": "Adds batch import functionality to most pages",
-  "constraints": { "bitcartcc": "" },
+  "constraints": { "bitcart": "" },
   "installs": [
     { "type": "backend", "path": "src/backend/batchimport" },
     { "type": "admin", "path": "src/admin/batchimport" }

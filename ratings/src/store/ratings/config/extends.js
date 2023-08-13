@@ -1,4 +1,4 @@
-import ProductsRating from "@bitcartcc-ratings/components/ProductsRating.vue"
+import ProductsRating from "@bitcart-ratings/components/ProductsRating.vue"
 
 export default {
   extendComponents: {

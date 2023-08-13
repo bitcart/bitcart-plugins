@@ -1,7 +1,7 @@
 export default {
-  name: "@bitcartcc/ratings",
+  name: "@bitcart/ratings",
   aliases: {
-    "@bitcartcc-ratings": "/",
+    "@bitcart-ratings": "/",
   },
   css: ["./styles.scss"],
 }

@@ -1,13 +1,13 @@
 {
-    "$schema": "https://bitcartcc.com/schemas/plugin/1.1.0/plugin.schema.json",
+    "$schema": "https://bitcart.ai/schemas/plugin/1.2.0/plugin.schema.json",
     "name": "Lightning Network +",
-    "author": "bitcartcc",
+    "author": "bitcart",
     "license": "MIT",
-    "website": "https://bitcartcc.com",
-    "source_url": "https://github.com/bitcartcc/bitcart-plugins/tree/master/lnplus",
-    "docs_url": "https://docs.bitcartcc.com",
+    "website": "https://bitcart.ai",
+    "source_url": "https://github.com/bitcart/bitcart-plugins/tree/master/lnplus",
+    "docs_url": "https://docs.bitcart.ai",
     "version": "1.0.0",
-    "description": "Allows to connect your own node to BitcartCC instead of built-in electrum one",
-    "constraints": { "bitcartcc": "" },
+    "description": "Allows to connect your own node to Bitcart instead of built-in electrum one",
+    "constraints": { "bitcart": "" },
     "installs": [{ "type": "backend", "path": "src/backend/lnplus" }]
 }
