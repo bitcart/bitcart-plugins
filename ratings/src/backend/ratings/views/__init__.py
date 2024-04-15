@@ -24,7 +24,7 @@ class UpdateRating(BaseModel):
 async def add_rating(model_id: str, data: UpdateRating):
     obj = await utils.database.get_object(models.Product, model_id)
     rating = Decimal(obj.metadata.get("rating", 0))
-    rating_count = obj.metadata.get("rating_count", 0)
+    rating_count = int(obj.metadata.get("rating_count", 0))
     rating = truncate((rating * rating_count + data.rating) / (rating_count + 1), 2)
     rating_count += 1
     obj = await update_metadata(models.Product, model_id, "rating", rating)
