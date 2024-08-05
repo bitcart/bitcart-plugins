@@ -20,7 +20,7 @@ class UpdateRating(BaseModel):
         return v
 
 
-@router.post("/products/{model_id}/rate", response_model=schemes.Product)
+@router.post("/products/{model_id}/rate", response_model=schemes.DisplayProduct)
 async def add_rating(model_id: str, data: UpdateRating):
     obj = await utils.database.get_object(models.Product, model_id)
     rating = Decimal(obj.metadata.get("rating", 0))
