@@ -12,7 +12,7 @@ from modules.bitcart.ratings.schemas import UpdateRating
 router = APIRouter(route_class=DIRoute)
 
 
-@router.post("/products/{model_id}/rate", response_model=DisplayProduct)
+@router.post("/{model_id}/rate", response_model=DisplayProduct)
 async def add_rating(product_service: FromDI[ProductService], model_id: str, data: UpdateRating) -> Any:
     obj = await product_service.get(model_id)
     rating = Decimal(obj.meta.get("rating", 0))

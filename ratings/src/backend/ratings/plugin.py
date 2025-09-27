@@ -4,15 +4,14 @@ from fastapi import FastAPI
 
 from api import models
 from api.plugins import BasePlugin, update_metadata
-
-from .views import router
+from modules.bitcart.ratings.views import router
 
 
 class Plugin(BasePlugin):
     name = "ratings"
 
     def setup_app(self, app: FastAPI) -> None:
-        app.include_router(router)
+        app.include_router(router, prefix="/products", tags=["products"])
 
     async def startup(self) -> None:
         self.context.register_filter("db_create_product", self.add_rating)

@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 
 from api.plugins import BasePlugin
-
-from .views import router
+from modules.bitcart.batchimport.views import router
 
 
 class Plugin(BasePlugin):
