@@ -1,3 +1,5 @@
+from fastapi import FastAPI
+
 from api.plugins import BasePlugin
 
 from .views import router
@@ -6,14 +8,14 @@ from .views import router
 class Plugin(BasePlugin):
     name = "batchimport"
 
-    def setup_app(self, app):
-        app.include_router(router)
+    def setup_app(self, app: FastAPI) -> None:
+        app.include_router(router, prefix="/batchimport", tags=["batchimport"])
 
-    async def startup(self):
+    async def startup(self) -> None:
         pass
 
-    async def shutdown(self):
+    async def shutdown(self) -> None:
         pass
 
-    async def worker_setup(self):
+    async def worker_setup(self) -> None:
         pass
