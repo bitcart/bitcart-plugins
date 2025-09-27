@@ -1,3 +1,4 @@
+from typing import cast
 from urllib.parse import urlsplit, urlunsplit
 
 from .lndhub import LNDHub
@@ -5,14 +6,14 @@ from .lndhub import LNDHub
 ALLOWED_CLIENTS = {"lndhub": LNDHub}
 
 
-def get_client(node_url):
+def get_client(node_url: str) -> LNDHub:
     parts = urlsplit(node_url, allow_fragments=True)
     if parts.scheme not in ALLOWED_CLIENTS:
         raise ValueError("Unsupported client")
-    netloc = parts.netloc.split("@")
-    if len(netloc) != 2:
+    netloc_parts = parts.netloc.split("@")
+    if len(netloc_parts) != 2:
         raise ValueError("Invalid URL")
-    netloc = netloc[1]
+    netloc = netloc_parts[1]
     reconstruction_parts = (
         parts.scheme,
         netloc,
@@ -20,9 +21,5 @@ def get_client(node_url):
         parts.query,
         parts.fragment,
     )
-    reconstructed_url = urlunsplit(reconstruction_parts).replace(
-        f"{parts.scheme}://", ""
-    )
-    return ALLOWED_CLIENTS[parts.scheme](
-        reconstructed_url, parts.username, parts.password
-    )
+    reconstructed_url = urlunsplit(reconstruction_parts).replace(f"{parts.scheme}://", "")
+    return ALLOWED_CLIENTS[parts.scheme](reconstructed_url, cast(str, parts.username), cast(str, parts.password))

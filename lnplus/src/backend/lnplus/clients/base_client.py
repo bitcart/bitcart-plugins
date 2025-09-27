@@ -1,4 +1,7 @@
-from aiohttp import ClientSession, ContentTypeError
+import asyncio
+from typing import Any
+
+from aiohttp import ClientSession, ClientTimeout, ContentTypeError
 from universalasync import get_event_loop
 
 
@@ -7,12 +10,12 @@ class RequestError(Exception):
 
 
 class HTTPProvider:
-    def __init__(self, url):
+    def __init__(self, url: str) -> None:
         self.url = url
-        self._sessions = {}
+        self._sessions: dict[asyncio.AbstractEventLoop, ClientSession] = {}
 
     @property
-    def session(self):
+    def session(self) -> ClientSession:
         loop = get_event_loop()
         session = self._sessions.get(loop)
         if session is not None:
@@ -32,13 +35,15 @@ class HTTPProvider:
         else:
             loop.run_until_complete(self._close())
 
-    async def raw_request(self, request_method, url, headers={}, **kwargs):
+    async def raw_request(self, request_method: str, url: str, headers: dict[str, str] | None = None, **kwargs: Any) -> Any:
+        if headers is None:
+            headers = {}
         async with self.session.request(
             request_method,
             f"{self.url}/{url}",
             json=kwargs,
             headers=headers,
-            timeout=5 * 60,
+            timeout=ClientTimeout(total=5 * 60),
         ) as response:
             try:
                 data = await response.json()
