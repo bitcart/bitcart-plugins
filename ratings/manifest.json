@@ -6,9 +6,9 @@
     "website": "https://bitcart.ai",
     "source_url": "https://github.com/bitcart/bitcart-plugins/tree/master/ratings",
     "docs_url": "https://docs.bitcart.ai",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Adds rating to products on store POS",
-    "constraints": { "bitcart": "" },
+    "constraints": { "bitcart": ">=0.11.0.0" },
     "installs": [
         { "type": "store", "path": "src/store/ratings" },
         { "type": "backend", "path": "src/backend/ratings" }
