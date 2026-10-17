@@ -53,6 +53,7 @@ class LNPlusCoin(BaseCoin):
         return {
             "status": "complete" if is_paid else "pending",
             "tx_hashes": [],
+            "tx_amounts": {},
             "sent_amount": Decimal(0),
         }
 
@@ -141,10 +142,11 @@ class Plugin(BasePlugin):
         status: str,
         tx_hashes: list[str],
         sent_amount: Decimal,
+        tx_amounts: dict[str, str] | None,
         *,
         di_context: DIContainer,
     ) -> bool:
         invoice_service = await di_context.get(InvoiceService)
         sent_amount = method.amount if status == "complete" else Decimal(0)
-        await invoice_service.update_status(invoice, status, method, tx_hashes, sent_amount)
+        await invoice_service.update_status(invoice, status, method, tx_hashes, sent_amount, tx_amounts=tx_amounts)
         return True
