@@ -8,6 +8,8 @@ NODE_IDS: dict[str, str | None] = {}
 
 
 class LNDHub:
+    supports_amountless = False
+
     def __init__(self, url: str, login: str, password: str) -> None:
         self.client = HTTPProvider(url)
         self.login = login
@@ -70,13 +72,13 @@ class LNDHub:
         decoded = await self.lndecode(result["payment_request"])
         return result["payment_request"], decoded["payment_hash"]
 
-    async def check_payment(self, rhash: str) -> bool:
+    async def check_payment(self, rhash: str) -> Decimal | None:
         result = await self.client.raw_request(
             "GET",
             f"checkpayment/{rhash}",
             headers={"Authorization": await self.token},
         )
-        return result["paid"]
+        return Decimal(0) if result["paid"] else None
 
     async def lndecode(self, invoice: str) -> dict[str, Any]:
         return await self.client.raw_request(

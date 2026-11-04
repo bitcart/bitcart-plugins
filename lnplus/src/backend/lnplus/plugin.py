@@ -5,7 +5,7 @@ from typing import Any, cast
 from fastapi import FastAPI, HTTPException
 
 from api import models, utils
-from api.plugins import BaseCoin, BasePlugin, CoinServer, DIContainer
+from api.plugins import SKIP_PAYMENT_METHOD, BaseCoin, BasePlugin, CoinServer, DIContainer
 from api.services.crud.invoices import InvoiceService
 from api.services.payment_processor import PaymentProcessor
 from modules.bitcart.lnplus import clients
@@ -50,12 +50,12 @@ class LNPlusCoin(BaseCoin):
         }
 
     async def get_request(self, request_id: str) -> dict[str, Any]:
-        is_paid = await self.server.client.check_payment(request_id)
+        received = await self.server.client.check_payment(request_id)
         return {
-            "status": "complete" if is_paid else "pending",
+            "status": "pending" if received is None else "complete",
             "tx_hashes": [],
             "tx_amounts": {},
-            "sent_amount": Decimal(0),
+            "sent_amount": received or Decimal(0),
         }
 
     get_invoice = get_request
@@ -119,6 +119,8 @@ class Plugin(BasePlugin):
         if wallet.currency != "lnplus":
             return method
         client = cast(LNPlusCoin, original_coin).server.client
+        if not amount and not client.supports_amountless:
+            return SKIP_PAYMENT_METHOD
         node_id = await client.node_id
         ln_invoice, rhash = await client.create_invoice(amount, expiry=invoice.expiration_seconds)
         return {
@@ -148,6 +150,6 @@ class Plugin(BasePlugin):
         di_context: DIContainer,
     ) -> bool:
         invoice_service = await di_context.get(InvoiceService)
-        sent_amount = method.amount if status == "complete" else Decimal(0)
+        sent_amount = (sent_amount or method.amount) if status == "complete" else Decimal(0)
         await invoice_service.update_status(invoice, status, method, tx_hashes, sent_amount, tx_amounts=tx_amounts)
         return True

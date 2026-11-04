@@ -12,6 +12,8 @@ class RequestError(Exception):
 
 
 class LightningClient(Protocol):
+    supports_amountless: bool
+
     @classmethod
     def from_url(cls, node_url: str) -> Self: ...
 
@@ -24,7 +26,9 @@ class LightningClient(Protocol):
         self, amount: Decimal, memo: str | None = None, *, expiry: int | None = None
     ) -> tuple[str, str]: ...
 
-    async def check_payment(self, rhash: str) -> bool: ...
+    async def check_payment(self, rhash: str) -> Decimal | None:
+        """Return the BTC amount received, 0 if the backend doesn't report it, or None if unpaid."""
+        ...
 
 
 def split_node_url(node_url: str) -> tuple[str, str | None, str | None]:

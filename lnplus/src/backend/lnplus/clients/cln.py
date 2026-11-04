@@ -14,6 +14,8 @@ NODE_IDS: dict[str, str] = {}
 class CLN:
     """Core Lightning client using native CLNRest and rune authentication."""
 
+    supports_amountless = True
+
     def __init__(self, url: str, rune: str) -> None:
         if "://" not in url:
             url = f"https://{url}"
@@ -89,13 +91,13 @@ class CLN:
 
     async def create_invoice(self, amount: Decimal, memo: str | None = None, *, expiry: int | None = None) -> tuple[str, str]:
         """Create a BOLT11 invoice with an optional lifetime in seconds."""
-        if not amount.is_finite() or amount <= 0:
-            raise ValueError("Invoice amount must be positive and finite")
+        if not amount.is_finite() or amount < 0:
+            raise ValueError("Invoice amount must be finite and not negative")
         amount_msat = amount * MSAT_PER_BTC
         if amount_msat != amount_msat.to_integral_value():
             raise ValueError("Invoice amount must be a whole number of millisatoshis")
         params: dict[str, Any] = {
-            "amount_msat": int(amount_msat),
+            "amount_msat": int(amount_msat) or "any",
             "label": f"bitcart-{uuid4().hex}",
             "description": memo or "",
         }
@@ -104,6 +106,9 @@ class CLN:
         result = await self._request("invoice", **params)
         return result["bolt11"], result["payment_hash"]
 
-    async def check_payment(self, rhash: str) -> bool:
+    async def check_payment(self, rhash: str) -> Decimal | None:
         result = await self._request("listinvoices", payment_hash=rhash)
-        return any(invoice["status"] == "paid" for invoice in result["invoices"])
+        for invoice in result["invoices"]:
+            if invoice["status"] == "paid":
+                return Decimal(invoice["amount_received_msat"]) / MSAT_PER_BTC
+        return None
