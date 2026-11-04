@@ -1,9 +1,10 @@
 from typing import cast
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import unquote, urlsplit, urlunsplit
 
 from .lndhub import LNDHub
+from .cln import CLN
 
-ALLOWED_CLIENTS = {"lndhub": LNDHub}
+ALLOWED_CLIENTS = {"lndhub": LNDHub, "cln": CLN}
 
 
 def get_client(node_url: str) -> LNDHub:
@@ -22,4 +23,6 @@ def get_client(node_url: str) -> LNDHub:
         parts.fragment,
     )
     reconstructed_url = urlunsplit(reconstruction_parts).replace(f"{parts.scheme}://", "")
-    return ALLOWED_CLIENTS[parts.scheme](reconstructed_url, cast(str, parts.username), cast(str, parts.password))
+    username = unquote(parts.username) if parts.username is not None else None
+    password = unquote(parts.password) if parts.password is not None else None
+    return ALLOWED_CLIENTS[parts.scheme](reconstructed_url, cast(str, username), cast(str, password))
