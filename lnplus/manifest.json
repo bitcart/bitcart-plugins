@@ -5,7 +5,7 @@
     "license": "MIT",
     "website": "https://bitcart.ai",
     "source_url": "https://github.com/bitcart/bitcart-plugins/tree/master/lnplus",
-    "docs_url": "https://docs.bitcart.ai",
+    "docs_url": "https://docs.bitcart.ai/guides/lightning-network-plus",
     "version": "1.0.1",
     "description": "Allows to connect your own node to Bitcart instead of built-in electrum one",
     "constraints": { "bitcart": ">=0.11.0.0" },

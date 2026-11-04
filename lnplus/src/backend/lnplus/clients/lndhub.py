@@ -1,19 +1,28 @@
 from decimal import Decimal
-from typing import Any
+from typing import Any, Self
 
-from .base_client import HTTPProvider
+from .base_client import HTTPProvider, split_node_url
 
 TOKENS: dict[str, str] = {}
 NODE_IDS: dict[str, str | None] = {}
 
 
 class LNDHub:
+    supports_amountless = False
+
     def __init__(self, url: str, login: str, password: str) -> None:
         self.client = HTTPProvider(url)
         self.login = login
         self.password = password
         self._token: str | None = None
         self._node_id: str | None = None
+
+    @classmethod
+    def from_url(cls, node_url: str) -> Self:
+        url, login, password = split_node_url(node_url)
+        if not login or not password:
+            raise ValueError("LNDHub login and password are required")
+        return cls(url, login, password)
 
     async def authorize(self) -> str:
         if TOKENS.get(self.login) is not None:
@@ -51,7 +60,7 @@ class LNDHub:
         sats_balance = res.get("BTC", {"AvailableBalance": 0}).get("AvailableBalance", 0)
         return Decimal(sats_balance) / Decimal(10**8)
 
-    async def create_invoice(self, amount: Decimal, memo: str | None = None) -> tuple[str, str]:
+    async def create_invoice(self, amount: Decimal, memo: str | None = None, *, expiry: int | None = None) -> tuple[str, str]:
         sats_amount = int(float(amount) * 10**8)
         result = await self.client.raw_request(
             "POST",
@@ -63,13 +72,13 @@ class LNDHub:
         decoded = await self.lndecode(result["payment_request"])
         return result["payment_request"], decoded["payment_hash"]
 
-    async def check_payment(self, rhash: str) -> bool:
+    async def check_payment(self, rhash: str) -> Decimal | None:
         result = await self.client.raw_request(
             "GET",
             f"checkpayment/{rhash}",
             headers={"Authorization": await self.token},
         )
-        return result["paid"]
+        return Decimal(0) if result["paid"] else None
 
     async def lndecode(self, invoice: str) -> dict[str, Any]:
         return await self.client.raw_request(

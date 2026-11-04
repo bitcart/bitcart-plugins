@@ -1,25 +1,14 @@
-from typing import cast
-from urllib.parse import urlsplit, urlunsplit
+from urllib.parse import urlsplit
 
+from .base_client import LightningClient
+from .cln import CLN
 from .lndhub import LNDHub
 
-ALLOWED_CLIENTS = {"lndhub": LNDHub}
+ALLOWED_CLIENTS: dict[str, type[LightningClient]] = {"lndhub": LNDHub, "cln": CLN}
 
 
-def get_client(node_url: str) -> LNDHub:
-    parts = urlsplit(node_url, allow_fragments=True)
-    if parts.scheme not in ALLOWED_CLIENTS:
+def get_client(node_url: str) -> LightningClient:
+    client_cls = ALLOWED_CLIENTS.get(urlsplit(node_url).scheme)
+    if client_cls is None:
         raise ValueError("Unsupported client")
-    netloc_parts = parts.netloc.split("@")
-    if len(netloc_parts) != 2:
-        raise ValueError("Invalid URL")
-    netloc = netloc_parts[1]
-    reconstruction_parts = (
-        parts.scheme,
-        netloc,
-        parts.path,
-        parts.query,
-        parts.fragment,
-    )
-    reconstructed_url = urlunsplit(reconstruction_parts).replace(f"{parts.scheme}://", "")
-    return ALLOWED_CLIENTS[parts.scheme](reconstructed_url, cast(str, parts.username), cast(str, parts.password))
+    return client_cls.from_url(node_url)

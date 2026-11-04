@@ -4,6 +4,6 @@ This repository contains source code for official plugins maintained by Bitcart.
 
 # Plugins list:
 
-- Lightning Network + - connect to your external pre-setup lightning node instead of Bitcart's built-in electrum one. (currently only LNDHub is supported)
+- Lightning Network + - connect to your external pre-setup lightning node instead of Bitcart's built-in electrum one. (Core Lightning via CLNRest and LNDHub are supported)
 - Daemons RPC Plugin - exposes daemons RPC to Merchants API (via `server_management` scope) and adds a nice interactive daemons shell
 - Ratings plugin - adds ability for customers to rate products on store POS via a simple 5-star system

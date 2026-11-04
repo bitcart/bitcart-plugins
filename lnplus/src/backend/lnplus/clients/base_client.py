@@ -1,5 +1,7 @@
 import asyncio
-from typing import Any
+from decimal import Decimal
+from typing import Any, Protocol, Self
+from urllib.parse import unquote, urlsplit, urlunsplit
 
 from aiohttp import ClientSession, ClientTimeout, ContentTypeError
 from universalasync import get_event_loop
@@ -7,6 +9,37 @@ from universalasync import get_event_loop
 
 class RequestError(Exception):
     pass
+
+
+class LightningClient(Protocol):
+    supports_amountless: bool
+
+    @classmethod
+    def from_url(cls, node_url: str) -> Self: ...
+
+    @property
+    async def node_id(self) -> str | None: ...
+
+    async def get_balance(self) -> Decimal: ...
+
+    async def create_invoice(
+        self, amount: Decimal, memo: str | None = None, *, expiry: int | None = None
+    ) -> tuple[str, str]: ...
+
+    async def check_payment(self, rhash: str) -> Decimal | None:
+        """Return the BTC amount received, 0 if the backend doesn't report it, or None if unpaid."""
+        ...
+
+
+def split_node_url(node_url: str) -> tuple[str, str | None, str | None]:
+    parts = urlsplit(node_url)
+    netloc_parts = parts.netloc.split("@")
+    if len(netloc_parts) != 2:
+        raise ValueError("Invalid URL")
+    url = urlunsplit((parts.scheme, netloc_parts[1], parts.path, parts.query, parts.fragment))
+    username = unquote(parts.username) if parts.username is not None else None
+    password = unquote(parts.password) if parts.password is not None else None
+    return url.removeprefix(f"{parts.scheme}://"), username, password
 
 
 class HTTPProvider:
