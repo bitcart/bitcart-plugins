@@ -1,20 +1,19 @@
 import asyncio
 from decimal import Decimal
 from typing import Any, cast
-from urllib.parse import urlsplit
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 from api import models, utils
 from api.plugins import BaseCoin, BasePlugin, CoinServer, DIContainer
 from api.services.crud.invoices import InvoiceService
 from api.services.payment_processor import PaymentProcessor
 from modules.bitcart.lnplus import clients
-from modules.bitcart.lnplus.clients.lndhub import LNDHub
+from modules.bitcart.lnplus.clients.base_client import LightningClient
 
 
 class LnPlusCoinServer(CoinServer):
-    client: LNDHub
+    client: LightningClient
 
     def __init__(self, currency: str, xpub: str | None, **additional_data: Any) -> None:
         super().__init__(currency, xpub, **additional_data)
@@ -33,11 +32,13 @@ class LNPlusCoin(BaseCoin):
     rate_rules = "LNPLUS_X = BTC_X"
 
     async def validate_key(self, key: str, *args: Any, **kwargs: Any) -> bool:
-        node_url = key
-        if not node_url:
+        if not key:
             return False
-        parsed = urlsplit(node_url, allow_fragments=True)
-        return parsed.scheme in clients.ALLOWED_CLIENTS
+        try:
+            clients.get_client(key)
+        except ValueError as e:
+            raise HTTPException(422, f"Wallet key invalid: {e}") from None
+        return True
 
     async def balance(self) -> dict[str, Decimal]:
         balance = await self.server.client.get_balance()
@@ -117,9 +118,9 @@ class Plugin(BasePlugin):
     ) -> dict[str, Any] | object | None:
         if wallet.currency != "lnplus":
             return method
-        coin = cast(LNPlusCoin, original_coin)
-        ln_invoice_data = await coin.server.client.create_invoice(amount)
-        ln_invoice, rhash = ln_invoice_data
+        client = cast(LNPlusCoin, original_coin).server.client
+        node_id = await client.node_id
+        ln_invoice, rhash = await client.create_invoice(amount, expiry=invoice.expiration_seconds)
         return {
             "currency": "lnplus",
             "payment_address": ln_invoice,
@@ -127,7 +128,7 @@ class Plugin(BasePlugin):
             "lookup_field": rhash,
             "rhash": rhash,
             "lightning": True,
-            "node_id": await coin.server.client.node_id,
+            "node_id": node_id,
         }
 
     async def process_pending(self) -> None:

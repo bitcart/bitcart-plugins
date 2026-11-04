@@ -1,21 +1,20 @@
 from decimal import Decimal
-from typing import Any
+from typing import Any, Self
 from urllib.parse import urlsplit
 from uuid import uuid4
 
 from aiohttp import ClientTimeout, ContentTypeError
 
-from .base_client import HTTPProvider, RequestError
+from .base_client import HTTPProvider, RequestError, split_node_url
 
 MSAT_PER_BTC = Decimal(10**11)
+NODE_IDS: dict[str, str] = {}
 
 
 class CLN:
     """Core Lightning client using native CLNRest and rune authentication."""
 
-    def __init__(self, url: str, rune: str, _: Any) -> None:
-        if not rune or not rune.strip():
-            raise ValueError("CLN rune is required")
+    def __init__(self, url: str, rune: str) -> None:
         if "://" not in url:
             url = f"https://{url}"
         parts = urlsplit(url)
@@ -32,7 +31,13 @@ class CLN:
         base_url = parts._replace(path=parts.path.rstrip("/").removesuffix("/v1")).geturl()
         self.client = HTTPProvider(base_url)
         self.rune = rune
-        self._node_id: str | None = None
+
+    @classmethod
+    def from_url(cls, node_url: str) -> Self:
+        url, rune, _ = split_node_url(node_url)
+        if not rune or not rune.strip():
+            raise ValueError("CLN rune is required")
+        return cls(url, rune)
 
     async def _request(self, method: str, **params: Any) -> dict[str, Any]:
         async with self.client.session.request(
@@ -69,27 +74,21 @@ class CLN:
 
     @property
     async def node_id(self) -> str:
-        if self._node_id is None:
-            self._node_id = await self.get_node_id()
-        return self._node_id
+        if self.client.url not in NODE_IDS:
+            NODE_IDS[self.client.url] = await self.get_node_id()
+        return NODE_IDS[self.client.url]
 
     async def get_balance(self) -> Decimal:
         """Return the local balance of normal Lightning channels in BTC."""
         result = await self._request("listfunds")
         balance_msat = sum(
-            (
-                Decimal(str(channel["our_amount_msat"]).removesuffix("msat"))
-                for channel in result["channels"]
-                if channel.get("state") == "CHANNELD_NORMAL"
-            ),
+            (Decimal(channel["our_amount_msat"]) for channel in result["channels"] if channel["state"] == "CHANNELD_NORMAL"),
             Decimal(0),
         )
         return balance_msat / MSAT_PER_BTC
 
     async def create_invoice(self, amount: Decimal, memo: str | None = None, *, expiry: int | None = None) -> tuple[str, str]:
         """Create a BOLT11 invoice with an optional lifetime in seconds."""
-        if expiry is not None and (isinstance(expiry, bool) or not isinstance(expiry, int) or expiry <= 0):
-            raise ValueError("Invoice expiry must be a positive integer number of seconds")
         if not amount.is_finite() or amount <= 0:
             raise ValueError("Invoice amount must be positive and finite")
         amount_msat = amount * MSAT_PER_BTC
@@ -98,7 +97,7 @@ class CLN:
         params: dict[str, Any] = {
             "amount_msat": int(amount_msat),
             "label": f"bitcart-{uuid4().hex}",
-            "description": memo if memo is not None else "",
+            "description": memo or "",
         }
         if expiry is not None:
             params["expiry"] = expiry
@@ -107,10 +106,4 @@ class CLN:
 
     async def check_payment(self, rhash: str) -> bool:
         result = await self._request("listinvoices", payment_hash=rhash)
-        return any(invoice["payment_hash"] == rhash and invoice["status"] == "paid" for invoice in result["invoices"])
-
-    async def lndecode(self, invoice: str) -> dict[str, Any]:
-        result = await self._request("decode", string=invoice)
-        if not result.get("valid") or result.get("type") != "bolt11 invoice":
-            raise RequestError("CLNRest decode did not return a valid BOLT11 invoice")
-        return result
+        return any(invoice["status"] == "paid" for invoice in result["invoices"])

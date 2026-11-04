@@ -1,7 +1,7 @@
 from decimal import Decimal
-from typing import Any
+from typing import Any, Self
 
-from .base_client import HTTPProvider
+from .base_client import HTTPProvider, split_node_url
 
 TOKENS: dict[str, str] = {}
 NODE_IDS: dict[str, str | None] = {}
@@ -14,6 +14,13 @@ class LNDHub:
         self.password = password
         self._token: str | None = None
         self._node_id: str | None = None
+
+    @classmethod
+    def from_url(cls, node_url: str) -> Self:
+        url, login, password = split_node_url(node_url)
+        if not login or not password:
+            raise ValueError("LNDHub login and password are required")
+        return cls(url, login, password)
 
     async def authorize(self) -> str:
         if TOKENS.get(self.login) is not None:
@@ -51,7 +58,7 @@ class LNDHub:
         sats_balance = res.get("BTC", {"AvailableBalance": 0}).get("AvailableBalance", 0)
         return Decimal(sats_balance) / Decimal(10**8)
 
-    async def create_invoice(self, amount: Decimal, memo: str | None = None) -> tuple[str, str]:
+    async def create_invoice(self, amount: Decimal, memo: str | None = None, *, expiry: int | None = None) -> tuple[str, str]:
         sats_amount = int(float(amount) * 10**8)
         result = await self.client.raw_request(
             "POST",
