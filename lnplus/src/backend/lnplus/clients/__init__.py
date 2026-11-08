@@ -2,9 +2,10 @@ from urllib.parse import urlsplit
 
 from .base_client import LightningClient
 from .cln import CLN
+from .lnd import LND
 from .lndhub import LNDHub
 
-ALLOWED_CLIENTS: dict[str, type[LightningClient]] = {"lndhub": LNDHub, "cln": CLN}
+ALLOWED_CLIENTS: dict[str, type[LightningClient]] = {"lndhub": LNDHub, "cln": CLN, "lnd": LND}
 
 
 def get_client(node_url: str) -> LightningClient:
